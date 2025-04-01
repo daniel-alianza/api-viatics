@@ -6,12 +6,27 @@ export class UsersService {
   constructor(private prisma: PrismaClient) {}
 
   async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      include: {
+        company: true,
+        branch: true,
+        area: true,
+        role: true,
+        cards: true,
+      },
+    });
   }
 
   async findOne(id: number): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { id },
+      include: {
+        company: true,
+        branch: true,
+        area: true,
+        role: true,
+        cards: true,
+      },
     });
   }
 
