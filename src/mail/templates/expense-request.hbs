@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Nueva Solicitud de Viáticos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .content {
+            padding: 20px;
+        }
+        .info-section {
+            margin-bottom: 20px;
+        }
+        .expense-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .actions {
+            margin: 20px 0;
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .comment-box {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 80px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .approve-button {
+            background-color: #4CAF50;
+        }
+        .reject-button {
+            background-color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Nueva Solicitud de Viáticos</h2>
+        <p><strong>Solicitante:</strong> {{requestedBy}}</p>
+    </div>
+    
+    <div class="content">
+        <div class="info-section">
+            <h3>Información General</h3>
+            <ul>
+                <li><strong>Empresa:</strong> {{company}}</li>
+                <li><strong>Sucursal:</strong> {{branch}}</li>
+                <li><strong>Área:</strong> {{area}}</li>
+                <li><strong>Motivo del Viaje:</strong> {{travelReason}}</li>
+                <li><strong>Fecha de Salida:</strong> {{departureDate}}</li>
+                <li><strong>Fecha de Regreso:</strong> {{returnDate}}</li>
+                <li><strong>Fecha de Dispersión:</strong> {{disbursementDate}}</li>
+                <li><strong>Monto Total:</strong> {{totalAmount}}</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h3>Detalles de Gastos</h3>
+            <div class="expense-details">
+                {{#each details}}
+                <p><strong>{{concept}}:</strong> ${{amount}}</p>
+                {{/each}}
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Objetivos del Viaje</h3>
+            <p>{{travelObjectives}}</p>
+        </div>
+
+        <div class="actions">
+            <div style="margin-bottom: 20px;">
+                <label for="comment" style="display: block; margin-bottom: 10px;">
+                    <strong>Comentarios:</strong>
+                </label>
+                <textarea id="comment" class="comment-box" 
+                    placeholder="Ingrese sus comentarios aquí..."></textarea>
+            </div>
+
+            <div>
+                <a href="{{apiUrl}}/expense-requests/approve/{{requestId}}?approverId={{approverId}}&comment=" 
+                   onclick="this.href = this.href + encodeURIComponent(document.getElementById('comment').value);"
+                   class="button approve-button">
+                    Aprobar Solicitud
+                </a>
+                <a href="{{apiUrl}}/expense-requests/reject/{{requestId}}?approverId={{approverId}}&comment="
+                   onclick="this.href = this.href + encodeURIComponent(document.getElementById('comment').value);"
+                   class="button reject-button">
+                    Rechazar Solicitud
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Esta solicitud requiere su revisión y aprobación.</p>
+        <p>Portal Grupo FG - Sistema de Viáticos</p>
+    </div>
+</body>
+</html> 

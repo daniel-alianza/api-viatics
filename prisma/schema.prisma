@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id       Int      @id @default(autoincrement()) @map("ID")
+  name     String   @map("NAME")
+  users    User[]
+  branches Branch[] // Agregado para definir la relación inversa con Branch
+}
+
+model Role {
+  id    Int    @id @default(autoincrement()) @map("ID")
+  name  String @map("NAME")
+  users User[]
+}
+
+model Branch {
+  id        Int     @id @default(autoincrement()) @map("ID")
+  name      String  @map("NAME")
+  companyId Int     @map("ID_COMPANY")
+  company   Company @relation(fields: [companyId], references: [id])
+  areas     Area[]
+  users     User[]
+}
+
+model Area {
+  id       Int    @id @default(autoincrement()) @map("ID")
+  name     String @map("NAME")
+  branchId Int    @map("ID_BRANCH")
+  branch   Branch @relation(fields: [branchId], references: [id])
+  users    User[]
+}
+
+model User {
+  id                Int              @id @default(autoincrement()) @map("ID")
+  name              String           @map("NAME")
+  email             String           @unique
+  password          String
+  companyId         Int?             @map("ID_COMPANY")
+  branchId          Int?             @map("ID_BRANCH")
+  areaId            Int?             @map("ID_AREA")
+  roleId            Int              @map("ID_ROLE")
+  cards     Card[]
+  quotations        Quotation[]      @relation("UserQuotations")
+  quotationsCreated Quotation[]      @relation("UserCreatedQuotations")
+  quotesUsers       QuotesUsers[]
+  expenseRequests   ExpenseRequest[]
+  company           Company?         @relation(fields: [companyId], references: [id])
+  branch            Branch?          @relation(fields: [branchId], references: [id])
+  area              Area?            @relation(fields: [areaId], references: [id])
+  role              Role             @relation(fields: [roleId], references: [id])
+
+  @@index([companyId], map: "User_ID_COMPANY_fkey")
+  @@index([branchId], map: "User_ID_BRANCH_fkey")
+  @@index([areaId], map: "User_ID_AREA_fkey")
+  @@index([roleId], map: "User_ID_ROLE_fkey")
+}
+
+model Quotation {
+  id            Int           @id @default(autoincrement()) @map("ID")
+  urlQuotation  String        @map("URL_QUOTATION")
+  userCreatorId Int?          @map("USER_CREATOR")
+  userId        Int?          @map("ID_USER")
+  user          User?         @relation("UserQuotations", fields: [userId], references: [id])
+  userCreator   User?         @relation("UserCreatedQuotations", fields: [userCreatorId], references: [id])
+  quotesUsers   QuotesUsers[]
+
+  @@index([userId], map: "Quotation_ID_USER_fkey")
+  @@index([userCreatorId], map: "Quotation_USER_CREATOR_fkey")
+}
+
+model ExpenseRequest {
+  id               Int             @id @default(autoincrement()) @map("ID")
+  userId           Int             @map("ID_USER")
+  totalAmount      Float           @map("MONTO_TOTAL")
+  status           String          @default("Pendiente") @map("STATUS")
+  createdAt        DateTime        @default(now()) @map("FECHA")
+  travelReason     String          @map("TRAVEL_REASON")
+  departureDate    DateTime        @map("DEPARTURE_DATE")
+  returnDate       DateTime        @map("RETURN_DATE")
+  disbursementDate DateTime        @map("DISBURSEMENT_DATE")
+  travelObjectives String          @map("TRAVEL_OBJECTIVES")
+  user             User            @relation(fields: [userId], references: [id])
+  details          ExpenseDetail[]
+
+  @@index([userId], map: "ExpenseRequest_ID_USER_fkey")
+}
+
+model ExpenseDetail {
+  id               Int            @id @default(autoincrement()) @map("ID")
+  expenseRequestId Int            @map("ID_EXPENSE_REQUEST")
+  concept          String         @map("CONCEPTO")
+  amount           Float          @map("MONTO")
+  request          ExpenseRequest @relation(fields: [expenseRequestId], references: [id])
+
+  @@index([expenseRequestId], map: "ExpenseDetail_ID_EXPENSE_REQUEST_fkey")
+}
+
+model QuotesUsers {
+  id      Int        @id @default(autoincrement()) @map("ID")
+  quoteId Int?       @map("QUOTE_ID")
+  userId  Int?       @map("ID_USER")
+  user    User?      @relation(fields: [userId], references: [id])
+  quote   Quotation? @relation(fields: [quoteId], references: [id])
+
+  @@index([userId], map: "QuotesUsers_ID_USER_fkey")
+  @@index([quoteId], map: "QuotesUsers_QUOTE_ID_fkey")
+}
+
+model Card {
+  id          Int      @id @default(autoincrement()) @map("ID")
+  cardNumber  String   @unique @map("CARD_NUMBER")
+  userId      Int?     @map("ID_USER")
+  user        User?    @relation(fields: [userId], references: [id])
+  isActive    Boolean  @default(true) @map("IS_ACTIVE")
+  assignedAt  DateTime @default(now()) @map("ASSIGNED_AT")
+
+  @@index([userId], map: "Card_ID_USER_fkey")
+}
