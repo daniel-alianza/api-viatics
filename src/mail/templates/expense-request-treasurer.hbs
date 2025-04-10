@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Nueva Solicitud de Viáticos Aprobada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .info-section {
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Nueva Solicitud de Viáticos Aprobada</h2>
+    </div>
+    
+    <div class="content">
+        <div class="info-section">
+            <h3>Detalles de la Solicitud</h3>
+            <p><strong>Solicitante:</strong> {{userName}}</p>
+            <p><strong>Empresa:</strong> {{company}}</p>
+            <p><strong>Sucursal:</strong> {{branch}}</p>
+            <p><strong>Área:</strong> {{area}}</p>
+            <p><strong>Aprobado por:</strong> {{approverName}}</p>
+            <p><strong>Motivo del Viaje:</strong> {{travelReason}}</p>
+            <p><strong>Fecha de Salida:</strong> {{departureDate}}</p>
+            <p><strong>Fecha de Regreso:</strong> {{returnDate}}</p>
+            <p><strong>Fecha de Dispersión:</strong> {{disbursementDate}}</p>
+            <p><strong>Monto Total:</strong> {{totalAmount}}</p>
+            <div class="expense-details">
+                <h4>Detalles de Gastos:</h4>
+                {{#each details}}
+                <p><strong>{{concept}}:</strong> ${{amount}}</p>
+                {{/each}}
+            </div>
+            {{#if comment}}
+            <div class="approver-comment">
+                <h4>Comentario del Aprobador:</h4>
+                <p>{{comment}}</p>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Portal Grupo FG - Sistema de Viáticos</p>
+    </div>
+</body>
+</html> 

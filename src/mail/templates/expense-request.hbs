@@ -39,29 +39,43 @@
             padding: 20px;
             border-radius: 8px;
         }
-        .comment-box {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            min-height: 80px;
-        }
         .button {
             display: inline-block;
             padding: 10px 20px;
             margin: 10px;
             border-radius: 5px;
             text-decoration: none;
-            color: white;
             font-weight: bold;
             cursor: pointer;
         }
         .approve-button {
             background-color: #4CAF50;
+            color: #ffffff;
+            border: 2px solid #4CAF50;
+        }
+        .approve-button:hover {
+            background-color: #45a049;
         }
         .reject-button {
             background-color: #ff6b6b;
+            color: #ffffff;
+            border: 2px solid #ff6b6b;
+        }
+        .reject-button:hover {
+            background-color: #ff5252;
+        }
+        .comment-instructions {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        table {
+            width: 100%;
+        }
+        td {
+            text-align: center;
         }
     </style>
 </head>
@@ -100,27 +114,33 @@
             <p>{{travelObjectives}}</p>
         </div>
 
-        <div class="actions">
-            <div style="margin-bottom: 20px;">
-                <label for="comment" style="display: block; margin-bottom: 10px;">
-                    <strong>Comentarios:</strong>
-                </label>
-                <textarea id="comment" class="comment-box" 
-                    placeholder="Ingrese sus comentarios aquí..."></textarea>
-            </div>
+        <div class="comment-instructions">
+            <p><strong>Instrucciones:</strong> Seleccione una de las siguientes opciones para aprobar o rechazar la solicitud:</p>
+        </div>
 
-            <div>
-                <a href="{{apiUrl}}/expense-requests/approve/{{requestId}}?approverId={{approverId}}&comment=" 
-                   onclick="this.href = this.href + encodeURIComponent(document.getElementById('comment').value);"
-                   class="button approve-button">
-                    Aprobar Solicitud
-                </a>
-                <a href="{{apiUrl}}/expense-requests/reject/{{requestId}}?approverId={{approverId}}&comment="
-                   onclick="this.href = this.href + encodeURIComponent(document.getElementById('comment').value);"
-                   class="button reject-button">
-                    Rechazar Solicitud
-                </a>
-            </div>
+        <div class="actions">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                    <td style="padding: 10px; text-align: center;">
+                        <p style="margin-bottom: 10px;"><strong>Aprobar:</strong></p>
+                        <a href="{{apiUrl}}/expense-requests/{{requestId}}/approve?approverId={{approverId}}&comment=Aprobado" style="background-color: #4CAF50; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-bottom: 5px;">
+                            Aprobar sin comentarios
+                        </a><br>
+                        <a href="{{apiUrl}}/expense-requests/{{requestId}}/approve?approverId={{approverId}}&comment=Aprobado.%20Favor%20de%20entregar%20comprobantes%20originales" style="background-color: #4CAF50; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            Aprobar con comprobantes
+                        </a>
+                    </td>
+                    <td style="padding: 10px; text-align: center;">
+                        <p style="margin-bottom: 10px;"><strong>Rechazar:</strong></p>
+                        <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado.%20Falta%20información" style="background-color: #ff6b6b; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-bottom: 5px;">
+                            Rechazar - Falta información
+                        </a><br>
+                        <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado.%20Montos%20incorrectos" style="background-color: #ff6b6b; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            Rechazar - Montos incorrectos
+                        </a>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 

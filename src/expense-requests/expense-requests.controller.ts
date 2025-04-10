@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  // Param,
-  // Query,
-  // Redirect,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { ExpenseRequestsService } from './expense-requests.service';
 import { CreateExpenseRequestDto } from './types';
 
@@ -16,13 +8,39 @@ export class ExpenseRequestsController {
     private readonly expenseRequestsService: ExpenseRequestsService,
   ) {}
 
+  @Post()
+  create(@Body() createExpenseRequestDto: CreateExpenseRequestDto) {
+    return this.expenseRequestsService.create(createExpenseRequestDto);
+  }
+
   @Get()
   findAll() {
     return this.expenseRequestsService.findAll();
   }
 
-  @Post()
-  create(@Body() createExpenseRequestDto: CreateExpenseRequestDto) {
-    return this.expenseRequestsService.create(createExpenseRequestDto);
+  @Get(':id/approve')
+  async approveRequest(
+    @Param('id') id: string,
+    @Query('approverId') approverId: string,
+    @Query('comment') comment?: string,
+  ) {
+    return this.expenseRequestsService.approveRequest(
+      parseInt(id),
+      parseInt(approverId),
+      comment,
+    );
+  }
+
+  @Get(':id/reject')
+  async rejectRequest(
+    @Param('id') id: string,
+    @Query('approverId') approverId: string,
+    @Query('comment') comment?: string,
+  ) {
+    return this.expenseRequestsService.rejectRequest(
+      parseInt(id),
+      parseInt(approverId),
+      comment,
+    );
   }
 }

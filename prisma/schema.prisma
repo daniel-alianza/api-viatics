@@ -46,8 +46,8 @@ model Area {
 model User {
   id                Int              @id @default(autoincrement()) @map("ID")
   name              String           @map("NAME")
-  email             String           @unique
-  password          String
+  email             String           @unique @map("EMAIL")
+  password          String           @map("PASSWORD")
   companyId         Int?             @map("ID_COMPANY")
   branchId          Int?             @map("ID_BRANCH")
   areaId            Int?             @map("ID_AREA")
@@ -57,16 +57,22 @@ model User {
   quotationsCreated Quotation[]      @relation("UserCreatedQuotations")
   quotesUsers       QuotesUsers[]
   expenseRequests   ExpenseRequest[]
+  approvedRequests  ExpenseRequest[] @relation("ApproverRelation")
   company           Company?         @relation(fields: [companyId], references: [id])
   branch            Branch?          @relation(fields: [branchId], references: [id])
   area              Area?            @relation(fields: [areaId], references: [id])
   role              Role             @relation(fields: [roleId], references: [id])
+  managerId         Int?             @map("MANAGER_ID")
+  manager           User?            @relation("UserManager", fields: [managerId], references: [id])
+  subordinates      User[]           @relation("UserManager")
 
   @@index([companyId], map: "User_ID_COMPANY_fkey")
   @@index([branchId], map: "User_ID_BRANCH_fkey")
   @@index([areaId], map: "User_ID_AREA_fkey")
   @@index([roleId], map: "User_ID_ROLE_fkey")
+  @@index([managerId], map: "User_MANAGER_ID_fkey") 
 }
+
 
 model Quotation {
   id            Int           @id @default(autoincrement()) @map("ID")
@@ -92,10 +98,14 @@ model ExpenseRequest {
   returnDate       DateTime        @map("RETURN_DATE")
   disbursementDate DateTime        @map("DISBURSEMENT_DATE")
   travelObjectives String          @map("TRAVEL_OBJECTIVES")
+  approverId       Int?            @map("APPROVER_ID")
+  comment          String?         @map("COMMENT")
   user             User            @relation(fields: [userId], references: [id])
+  approver         User?           @relation("ApproverRelation", fields: [approverId], references: [id])
   details          ExpenseDetail[]
 
   @@index([userId], map: "ExpenseRequest_ID_USER_fkey")
+  @@index([approverId], map: "ExpenseRequest_APPROVER_ID_fkey")
 }
 
 model ExpenseDetail {
