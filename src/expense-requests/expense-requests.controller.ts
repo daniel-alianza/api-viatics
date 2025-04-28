@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Patch,
+} from '@nestjs/common';
 import { ExpenseRequestsService } from './expense-requests.service';
 import { CreateExpenseRequestDto } from './types';
 
@@ -41,6 +49,17 @@ export class ExpenseRequestsController {
       parseInt(id),
       parseInt(approverId),
       comment,
+    );
+  }
+
+  @Patch(':id')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() updateDto: { status: string },
+  ) {
+    return this.expenseRequestsService.updateStatus(
+      parseInt(id),
+      updateDto.status,
     );
   }
 }

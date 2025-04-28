@@ -38,4 +38,18 @@ export class UsersController {
   assignCard(@Param('id') id: string, @Body('cardNumber') cardNumber: string) {
     return this.usersService.assignCard(+id, cardNumber);
   }
+
+  @Delete('cards/:cardId')
+  removeCard(@Param('cardId') cardId: string) {
+    return this.usersService.removeCard(+cardId);
+  }
+
+  @Patch('cards/:cardId')
+  updateCard(
+    @Param('cardId') cardId: string,
+    @Body()
+    updateCardDto: { cardNumber?: string; isActive?: boolean; limite?: number },
+  ) {
+    return this.usersService.updateCard(+cardId, updateCardDto);
+  }
 }

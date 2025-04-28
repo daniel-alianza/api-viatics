@@ -136,6 +136,7 @@ model Card {
   user        User?    @relation(fields: [userId], references: [id])
   isActive    Boolean  @default(true) @map("IS_ACTIVE")
   assignedAt  DateTime @default(now()) @map("ASSIGNED_AT")
+  limite      Decimal  @default(0.01) @map("LIMITE")
 
   @@index([userId], map: "Card_ID_USER_fkey")
 }
