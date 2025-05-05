@@ -6,13 +6,24 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from '@prisma/client';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateCardDto, UpdateCardDto } from './dto/card.dto';
 
 @Controller('users')
+@UsePipes(new ValidationPipe({ transform: true }))
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
 
   @Get()
   findAll() {
@@ -20,22 +31,41 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: Partial<User>) {
-    return this.usersService.update(+id, updateUserDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.remove(id);
   }
 
   @Post(':id/cards')
-  assignCard(@Param('id') id: string, @Body('cardNumber') cardNumber: string) {
-    return this.usersService.assignCard(+id, cardNumber);
+  assignCard(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() createCardDto: CreateCardDto,
+  ) {
+    return this.usersService.assignCard(id, createCardDto.cardNumber);
+  }
+
+  @Delete('cards/:cardId')
+  removeCard(@Param('cardId', ParseIntPipe) cardId: number) {
+    return this.usersService.removeCard(cardId);
+  }
+
+  @Patch('cards/:cardId')
+  updateCard(
+    @Param('cardId', ParseIntPipe) cardId: number,
+    @Body() updateCardDto: UpdateCardDto,
+  ) {
+    return this.usersService.updateCard(cardId, updateCardDto);
   }
 }

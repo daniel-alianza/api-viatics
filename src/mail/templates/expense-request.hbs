@@ -5,148 +5,212 @@
     <title>Nueva Solicitud de Viáticos</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #2c3e50;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
         .header {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-bottom: 2px solid #dee2e6;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
         }
         .content {
-            padding: 20px;
+            padding: 30px;
         }
         .info-section {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .info-section h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
         }
         .expense-details {
             background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #dee2e6;
-            font-size: 0.9em;
-            color: #6c757d;
-        }
-        .actions {
-            margin: 20px 0;
-            text-align: center;
-            background-color: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        .actions {
+            margin: 30px 0;
+            text-align: center;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
         }
         .button {
             display: inline-block;
-            padding: 10px 20px;
-            margin: 10px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 6px;
             text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 200px;
         }
         .approve-button {
-            background-color: #4CAF50;
+            background-color: #2ecc71;
             color: #ffffff;
-            border: 2px solid #4CAF50;
+            border: none;
         }
         .approve-button:hover {
-            background-color: #45a049;
+            background-color: #27ae60;
+            transform: translateY(-2px);
         }
         .reject-button {
-            background-color: #ff6b6b;
+            background-color: #e74c3c;
             color: #ffffff;
-            border: 2px solid #ff6b6b;
+            border: none;
         }
         .reject-button:hover {
-            background-color: #ff5252;
+            background-color: #c0392b;
+            transform: translateY(-2px);
         }
         .comment-instructions {
-            margin: 20px 0;
-            padding: 15px;
+            margin: 25px 0;
+            padding: 20px;
             background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #007bff;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
         }
-        table {
-            width: 100%;
-        }
-        td {
+        .footer {
+            margin-top: 30px;
+            padding: 20px;
             text-align: center;
+            background-color: #f8f9fa;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status-pending {
+            background-color: #f1c40f;
+            color: #ffffff;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 0;
+            }
+            .button-container {
+                flex-direction: column;
+            }
+            .button {
+                width: 100%;
+                margin: 5px 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>Nueva Solicitud de Viáticos</h2>
-        <p><strong>Solicitante:</strong> {{requestedBy}}</p>
-    </div>
-    
-    <div class="content">
-        <div class="info-section">
-            <h3>Información General</h3>
-            <ul>
-                <li><strong>Empresa:</strong> {{company}}</li>
-                <li><strong>Sucursal:</strong> {{branch}}</li>
-                <li><strong>Área:</strong> {{area}}</li>
-                <li><strong>Motivo del Viaje:</strong> {{travelReason}}</li>
-                <li><strong>Fecha de Salida:</strong> {{departureDate}}</li>
-                <li><strong>Fecha de Regreso:</strong> {{returnDate}}</li>
-                <li><strong>Fecha de Dispersión:</strong> {{disbursementDate}}</li>
-                <li><strong>Monto Total:</strong> {{totalAmount}}</li>
-            </ul>
+    <div class="container">
+        <div class="header">
+            <h2>Nueva Solicitud de Viáticos</h2>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">Solicitante: {{requestedBy}}</p>
         </div>
+        
+        <div class="content">
+            <div class="info-section">
+                <h3>Información General</h3>
+                <ul>
+                    <li><strong>Empresa:</strong> {{company}}</li>
+                    <li><strong>Sucursal:</strong> {{branch}}</li>
+                    <li><strong>Área:</strong> {{area}}</li>
+                    <li><strong>Motivo del Viaje:</strong> {{travelReason}}</li>
+                    <li><strong>Fecha de Salida:</strong> {{departureDate}}</li>
+                    <li><strong>Fecha de Regreso:</strong> {{returnDate}}</li>
+                    <li><strong>Fecha de Dispersión:</strong> {{disbursementDate}}</li>
+                    <li><strong>Monto Total:</strong> {{totalAmount}}</li>
+                </ul>
+            </div>
 
-        <div class="info-section">
-            <h3>Detalles de Gastos</h3>
-            <div class="expense-details">
-                {{#each details}}
-                <p><strong>{{concept}}:</strong> ${{amount}}</p>
-                {{/each}}
+            <div class="info-section">
+                <h3>Detalles de Gastos</h3>
+                <div class="expense-details">
+                    {{#each details}}
+                    <p><strong>{{concept}}:</strong> ${{amount}}</p>
+                    {{/each}}
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Objetivos del Viaje</h3>
+                <p>{{travelObjectives}}</p>
+            </div>
+
+            <div class="comment-instructions">
+                <p><strong>Instrucciones:</strong> Seleccione una de las siguientes opciones para aprobar o rechazar la solicitud:</p>
+            </div>
+
+            <div class="actions">
+                <div class="button-container">
+                    <a href="{{apiUrl}}/expense-requests/{{requestId}}/approve?approverId={{approverId}}&comment=Aprobado" class="button approve-button">
+                        Aprobar sin comentarios
+                    </a>
+                    <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado.%20Falta%20información" class="button reject-button">
+                        Rechazar - Falta información
+                    </a>
+                </div>
+                <div class="button-container">
+                    <a href="{{apiUrl}}/expense-requests/{{requestId}}/approve?approverId={{approverId}}&comment=Aprobado.%20Favor%20de%20entregar%20comprobantes%20originales" class="button approve-button">
+                        Aprobar con comprobantes
+                    </a>
+                    <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado.%20Montos%20incorrectos" class="button reject-button">
+                        Rechazar - Montos incorrectos
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="info-section">
-            <h3>Objetivos del Viaje</h3>
-            <p>{{travelObjectives}}</p>
+        <div class="footer">
+            <p>Esta solicitud requiere su revisión y aprobación.</p>
+            <p>Portal Grupo FG - Sistema de Viáticos</p>
         </div>
-
-        <div class="comment-instructions">
-            <p><strong>Instrucciones:</strong> Seleccione una de las siguientes opciones para aprobar o rechazar la solicitud:</p>
-        </div>
-
-        <div class="actions">
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                <tr>
-                    <td style="padding: 10px; text-align: center;">
-                        <p style="margin-bottom: 10px;"><strong>Aprobar:</strong></p>
-                        <a href="{{apiUrl}}/expense-requests/{{requestId}}/approve?approverId={{approverId}}&comment=Aprobado" style="background-color: #4CAF50; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-bottom: 5px;">
-                            Aprobar sin comentarios
-                        </a><br>
-                        <a href="{{apiUrl}}/expense-requests/{{requestId}}/approve?approverId={{approverId}}&comment=Aprobado.%20Favor%20de%20entregar%20comprobantes%20originales" style="background-color: #4CAF50; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-                            Aprobar con comprobantes
-                        </a>
-                    </td>
-                    <td style="padding: 10px; text-align: center;">
-                        <p style="margin-bottom: 10px;"><strong>Rechazar:</strong></p>
-                        <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado.%20Falta%20información" style="background-color: #ff6b6b; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-bottom: 5px;">
-                            Rechazar - Falta información
-                        </a><br>
-                        <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado.%20Montos%20incorrectos" style="background-color: #ff6b6b; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-                            Rechazar - Montos incorrectos
-                        </a>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>Esta solicitud requiere su revisión y aprobación.</p>
-        <p>Portal Grupo FG - Sistema de Viáticos</p>
     </div>
 </body>
 </html> 

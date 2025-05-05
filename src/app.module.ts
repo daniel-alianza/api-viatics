@@ -6,6 +6,8 @@ import { BranchModule } from './branch/branch.module';
 import { AreaModule } from './area/area.module';
 import { UsersModule } from './users/users.module';
 import { ExpenseRequestsModule } from './expense-requests/expense-requests.module';
+import { InspirationQuotesController } from './inspiration_quotes/inspiration_quotes.controller';
+import { InspirationQuotesModule } from './inspiration_quotes/inspiration_quotes.module';
 
 @Module({
   imports: [
@@ -16,8 +18,9 @@ import { ExpenseRequestsModule } from './expense-requests/expense-requests.modul
     AreaModule,
     UsersModule,
     ExpenseRequestsModule,
+    InspirationQuotesModule,
   ],
   providers: [],
-  controllers: [],
+  controllers: [InspirationQuotesController],
 })
 export class AppModule {}

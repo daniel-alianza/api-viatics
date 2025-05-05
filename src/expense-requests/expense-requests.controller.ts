@@ -1,6 +1,20 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Patch,
+  UsePipes,
+  ValidationPipe,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ExpenseRequestsService } from './expense-requests.service';
-import { CreateExpenseRequestDto } from './types';
+import {
+  CreateExpenseRequestDto,
+  UpdateExpenseRequestStatusDto,
+} from './dto/expense-request.dto';
 
 @Controller('expense-requests')
 export class ExpenseRequestsController {
@@ -9,6 +23,7 @@ export class ExpenseRequestsController {
   ) {}
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
   create(@Body() createExpenseRequestDto: CreateExpenseRequestDto) {
     return this.expenseRequestsService.create(createExpenseRequestDto);
   }
@@ -20,27 +35,33 @@ export class ExpenseRequestsController {
 
   @Get(':id/approve')
   async approveRequest(
-    @Param('id') id: string,
-    @Query('approverId') approverId: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Query('approverId', ParseIntPipe) approverId: number,
     @Query('comment') comment?: string,
   ) {
-    return this.expenseRequestsService.approveRequest(
-      parseInt(id),
-      parseInt(approverId),
-      comment,
-    );
+    return this.expenseRequestsService.approveRequest(id, approverId, comment);
   }
 
   @Get(':id/reject')
   async rejectRequest(
-    @Param('id') id: string,
-    @Query('approverId') approverId: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Query('approverId', ParseIntPipe) approverId: number,
     @Query('comment') comment?: string,
   ) {
-    return this.expenseRequestsService.rejectRequest(
-      parseInt(id),
-      parseInt(approverId),
-      comment,
-    );
+    return this.expenseRequestsService.rejectRequest(id, approverId, comment);
+  }
+
+  @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: UpdateExpenseRequestStatusDto,
+  ) {
+    return this.expenseRequestsService.updateStatus(id, updateDto.status);
+  }
+
+  @Patch(':id/disburse')
+  async disburseRequest(@Param('id', ParseIntPipe) id: number) {
+    return this.expenseRequestsService.updateStatus(id, 'Dispersada');
   }
 }

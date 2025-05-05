@@ -1,19 +1,5 @@
 import { User } from '@prisma/client';
 
-export interface CreateExpenseRequestDto {
-  userId: number;
-  totalAmount: number;
-  travelReason: string;
-  departureDate: string;
-  returnDate: string;
-  disbursementDate: string;
-  travelObjectives: string;
-  details: {
-    concept: string;
-    amount: number;
-  }[];
-}
-
 // Definimos una interfaz para los tipos de relaciones
 interface UserWithRelations extends User {
   company: { id: number; name: string } | null;
