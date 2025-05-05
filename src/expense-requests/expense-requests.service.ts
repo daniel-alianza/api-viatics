@@ -5,7 +5,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaClient, Prisma } from '@prisma/client';
-import { CreateExpenseRequestDto, ExpenseRequestWithRelations } from './types';
+import {
+  CreateExpenseRequestDto,
+  UpdateExpenseRequestStatusDto,
+} from './dto/expense-request.dto';
+import { ExpenseRequestWithRelations } from './dto/types.dto';
 import { MailService } from '../mail/mail.service';
 
 @Injectable()
@@ -504,11 +508,14 @@ export class ExpenseRequestsService {
     }
   }
 
-  async updateStatus(requestId: number, status: string) {
+  async updateStatus(
+    id: number,
+    status: string,
+  ): Promise<ExpenseRequestWithRelations> {
     try {
       // Verificar que la solicitud existe
       const existingRequest = await this.prisma.expenseRequest.findUnique({
-        where: { id: requestId },
+        where: { id },
       });
 
       if (!existingRequest) {
@@ -516,14 +523,30 @@ export class ExpenseRequestsService {
       }
 
       // Validar el estado
-      const validStatuses = ['Pendiente', 'Aprobada', 'Rechazada'];
+      const validStatuses = [
+        'Pendiente',
+        'Aprobada',
+        'Rechazada',
+        'Dispersada',
+      ];
       if (!validStatuses.includes(status)) {
         throw new BadRequestException('Estado no válido');
       }
 
       return await this.prisma.expenseRequest.update({
-        where: { id: requestId },
+        where: { id },
         data: { status },
+        include: {
+          user: {
+            include: {
+              company: true,
+              branch: true,
+              area: true,
+              role: true,
+            },
+          },
+          details: true,
+        },
       });
     } catch (error) {
       if (

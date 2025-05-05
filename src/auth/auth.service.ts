@@ -7,20 +7,13 @@ import {
 } from '@nestjs/common';
 import { PrismaClient, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { RegisterDto, LoginDto } from './dto/auth.dto';
 
 const prisma = new PrismaClient();
 
 @Injectable()
 export class AuthService {
-  async register(data: {
-    name: string;
-    email: string;
-    password: string;
-    companyId?: number;
-    branchId?: number;
-    areaId?: number;
-    managerId?: number;
-  }) {
+  async register(data: RegisterDto) {
     try {
       // Validación de datos requeridos
       if (!data.name || !data.email || !data.password) {
@@ -81,7 +74,7 @@ export class AuthService {
     }
   }
 
-  async login(data: { email: string; password: string }) {
+  async login(data: LoginDto) {
     try {
       if (!data.email || !data.password) {
         throw new BadRequestException('Email y contraseña son requeridos');

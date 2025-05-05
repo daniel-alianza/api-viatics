@@ -1,15 +1,53 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaClient, User, Card, Prisma } from '@prisma/client';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateCardDto } from './dto/card.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaClient) {}
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    try {
+      // Verificar si el email ya existe
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: createUserDto.email },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('El email ya está en uso');
+      }
+
+      // Hash de la contraseña
+      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+      return await this.prisma.user.create({
+        data: {
+          ...createUserDto,
+          password: hashedPassword,
+        },
+        include: {
+          company: true,
+          branch: true,
+          area: true,
+          role: true,
+          cards: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error al crear el usuario');
+    }
+  }
 
   async findAll(): Promise<User[]> {
     try {
@@ -23,11 +61,12 @@ export class UsersService {
         },
       });
     } catch (error) {
+      console.error('Error al obtener los usuarios:', error);
       throw new InternalServerErrorException('Error al obtener los usuarios');
     }
   }
 
-  async findOne(id: number): Promise<User | null> {
+  async findOne(id: number): Promise<User> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
@@ -53,7 +92,7 @@ export class UsersService {
     }
   }
 
-  async update(id: number, data: Partial<User>): Promise<User> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
       // Verificar si el usuario existe
       const existingUser = await this.prisma.user.findUnique({
@@ -65,9 +104,9 @@ export class UsersService {
       }
 
       // Si se está actualizando el email, verificar que no exista
-      if (data.email && data.email !== existingUser.email) {
+      if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
         const emailExists = await this.prisma.user.findUnique({
-          where: { email: data.email },
+          where: { email: updateUserDto.email },
         });
 
         if (emailExists) {
@@ -75,9 +114,21 @@ export class UsersService {
         }
       }
 
+      // Si se está actualizando la contraseña, hacer hash
+      if (updateUserDto.password) {
+        updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+      }
+
       return await this.prisma.user.update({
         where: { id },
-        data,
+        data: updateUserDto,
+        include: {
+          company: true,
+          branch: true,
+          area: true,
+          role: true,
+          cards: true,
+        },
       });
     } catch (error) {
       if (
@@ -108,6 +159,13 @@ export class UsersService {
 
       return await this.prisma.user.delete({
         where: { id },
+        include: {
+          company: true,
+          branch: true,
+          area: true,
+          role: true,
+          cards: true,
+        },
       });
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -134,7 +192,9 @@ export class UsersService {
       });
 
       if (existingCard) {
-        throw new ConflictException('Esta tarjeta ya está registrada');
+        throw new ConflictException(
+          'La tarjeta ya está asignada a otro usuario',
+        );
       }
 
       return await this.prisma.user.update({
@@ -144,7 +204,6 @@ export class UsersService {
             create: {
               cardNumber,
               isActive: true,
-              limite: 0.01,
             },
           },
         },
@@ -167,7 +226,7 @@ export class UsersService {
     }
   }
 
-  async removeCard(cardId: number) {
+  async removeCard(cardId: number): Promise<Card> {
     try {
       // Verificar si la tarjeta existe
       const existingCard = await this.prisma.card.findUnique({
@@ -191,48 +250,40 @@ export class UsersService {
 
   async updateCard(
     cardId: number,
-    data: { cardNumber?: string; isActive?: boolean; limite?: number },
+    updateCardDto: UpdateCardDto,
   ): Promise<Card> {
     try {
-      // Verificar que la tarjeta existe
-      const card = await this.prisma.card.findUnique({
+      // Verificar si la tarjeta existe
+      const existingCard = await this.prisma.card.findUnique({
         where: { id: cardId },
       });
 
-      if (!card) {
+      if (!existingCard) {
         throw new NotFoundException('Tarjeta no encontrada');
       }
 
       // Si se está actualizando el número de tarjeta, verificar que no exista
-      if (data.cardNumber && data.cardNumber !== card.cardNumber) {
-        const existingCard = await this.prisma.card.findUnique({
-          where: { cardNumber: data.cardNumber },
+      if (
+        updateCardDto.cardNumber &&
+        updateCardDto.cardNumber !== existingCard.cardNumber
+      ) {
+        const cardExists = await this.prisma.card.findUnique({
+          where: { cardNumber: updateCardDto.cardNumber },
         });
 
-        if (existingCard && existingCard.id !== cardId) {
-          throw new ConflictException('Este número de tarjeta ya está en uso');
+        if (cardExists) {
+          throw new ConflictException('El número de tarjeta ya está en uso');
         }
-      }
-
-      // Validar el límite si se está actualizando
-      if (data.limite !== undefined && data.limite < 0) {
-        throw new BadRequestException('El límite no puede ser negativo');
       }
 
       return await this.prisma.card.update({
         where: { id: cardId },
-        data: {
-          ...data,
-          cardNumber: data.cardNumber || card.cardNumber,
-          isActive: data.isActive !== undefined ? data.isActive : card.isActive,
-          limite: data.limite || card.limite,
-        },
+        data: updateCardDto,
       });
     } catch (error) {
       if (
         error instanceof NotFoundException ||
-        error instanceof ConflictException ||
-        error instanceof BadRequestException
+        error instanceof ConflictException
       ) {
         throw error;
       }
