@@ -137,3 +137,10 @@ model Card {
 
   @@index([userId], map: "Card_ID_USER_fkey")
 }
+
+model InspirationQuote {
+  id        Int      @id @default(autoincrement()) @map("ID")
+  content   String   @map("CONTENT")
+  author    String?  @map("AUTHOR")
+  createdAt DateTime @default(now()) @map("CREATED_AT")
+}
