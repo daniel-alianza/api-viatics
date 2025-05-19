@@ -82,12 +82,6 @@ export class ExpenseRequestsService {
         );
       }
 
-      if (disbursementDate < today) {
-        throw new BadRequestException(
-          'La fecha de desembolso no puede ser anterior a la fecha actual',
-        );
-      }
-
       // Validaciones de detalles
       if (!data.details || data.details.length === 0) {
         throw new BadRequestException(

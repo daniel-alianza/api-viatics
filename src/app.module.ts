@@ -6,8 +6,12 @@ import { BranchModule } from './branch/branch.module';
 import { AreaModule } from './area/area.module';
 import { UsersModule } from './users/users.module';
 import { ExpenseRequestsModule } from './expense-requests/expense-requests.module';
-import { InspirationQuotesController } from './inspiration_quotes/inspiration_quotes.controller';
 import { InspirationQuotesModule } from './inspiration_quotes/inspiration_quotes.module';
+import { DbTestModule } from './db_test/db_test.module';
+import { ComprobacionesModule } from './comprobaciones/comprobaciones.module';
+import { ViaticosModule } from './viaticos/viaticos.module';
+import { MovementsModule } from './movements/movements.module';
+import { MovimientosModule } from './movimientos/movimientos.module';
 
 @Module({
   imports: [
@@ -19,8 +23,12 @@ import { InspirationQuotesModule } from './inspiration_quotes/inspiration_quotes
     UsersModule,
     ExpenseRequestsModule,
     InspirationQuotesModule,
+    DbTestModule,
+    ComprobacionesModule,
+    ViaticosModule,
+    MovementsModule,
+    MovimientosModule,
   ],
   providers: [],
-  controllers: [InspirationQuotesController],
 })
 export class AppModule {}
