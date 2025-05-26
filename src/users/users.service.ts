@@ -3,11 +3,13 @@ import {
   NotFoundException,
   ConflictException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaClient, User, Card, Prisma } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateCardDto } from './dto/card.dto';
+import { UserWithMessage, CardWithMessage } from './dto/types.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -175,15 +177,37 @@ export class UsersService {
     }
   }
 
-  async assignCard(id: number, cardNumber: string): Promise<User> {
+  async assignCard(id: number, cardNumber: string): Promise<UserWithMessage> {
     try {
+      // Validación del número de tarjeta
+      if (!cardNumber || cardNumber.trim().length === 0) {
+        throw new BadRequestException(
+          'El número de tarjeta es requerido. ' +
+            'Por favor, proporcione un número de tarjeta válido.',
+        );
+      }
+
       // Verificar si el usuario existe
       const existingUser = await this.prisma.user.findUnique({
         where: { id },
+        include: {
+          cards: true,
+        },
       });
 
       if (!existingUser) {
-        throw new NotFoundException('Usuario no encontrado');
+        throw new NotFoundException(
+          `No se puede asignar la tarjeta porque el usuario con ID ${id} no existe. ` +
+            'Por favor, verifique que el usuario esté registrado en el sistema.',
+        );
+      }
+
+      // Verificar si el usuario ya tiene el máximo de tarjetas permitidas (3)
+      if (existingUser.cards.length >= 3) {
+        throw new BadRequestException(
+          `El usuario ya tiene el máximo de tarjetas permitidas (3). ` +
+            'No se pueden asignar más tarjetas a este usuario.',
+        );
       }
 
       // Verificar si la tarjeta ya existe
@@ -193,17 +217,19 @@ export class UsersService {
 
       if (existingCard) {
         throw new ConflictException(
-          'La tarjeta ya está asignada a otro usuario',
+          `El número de tarjeta ${cardNumber} ya está asignado a otro usuario. ` +
+            'Por favor, utilice un número de tarjeta diferente.',
         );
       }
 
-      return await this.prisma.user.update({
+      const updatedUser = await this.prisma.user.update({
         where: { id },
         data: {
           cards: {
             create: {
               cardNumber,
               isActive: true,
+              limite: 0.01, // Límite por defecto
             },
           },
         },
@@ -215,51 +241,91 @@ export class UsersService {
           cards: true,
         },
       });
+
+      return {
+        ...updatedUser,
+        message: 'Tarjeta asignada exitosamente al usuario',
+      };
     } catch (error) {
       if (
         error instanceof NotFoundException ||
-        error instanceof ConflictException
+        error instanceof ConflictException ||
+        error instanceof BadRequestException
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Error al asignar la tarjeta');
+      throw new InternalServerErrorException(
+        'Error inesperado al asignar la tarjeta. ' +
+          'Por favor, intente nuevamente o contacte al administrador del sistema si el problema persiste.',
+      );
     }
   }
 
-  async removeCard(cardId: number): Promise<Card> {
+  async removeCard(cardId: number): Promise<CardWithMessage> {
     try {
       // Verificar si la tarjeta existe
       const existingCard = await this.prisma.card.findUnique({
         where: { id: cardId },
+        include: {
+          user: true,
+        },
       });
 
       if (!existingCard) {
-        throw new NotFoundException('Tarjeta no encontrada');
+        throw new NotFoundException(
+          `No se puede eliminar la tarjeta porque no existe una tarjeta con ID ${cardId}. ` +
+            'Por favor, verifique el ID de la tarjeta.',
+        );
       }
 
-      return await this.prisma.card.delete({
+      // Verificar si la tarjeta está asignada a un usuario
+      if (!existingCard.user) {
+        throw new BadRequestException(
+          `La tarjeta con ID ${cardId} no está asignada a ningún usuario. ` +
+            'No es necesario eliminarla.',
+        );
+      }
+
+      const deletedCard = await this.prisma.card.delete({
         where: { id: cardId },
       });
+
+      return {
+        ...deletedCard,
+        message: 'Tarjeta eliminada exitosamente',
+      };
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      throw new InternalServerErrorException('Error al eliminar la tarjeta');
+      throw new InternalServerErrorException(
+        'Error inesperado al eliminar la tarjeta. ' +
+          'Por favor, intente nuevamente o contacte al administrador del sistema si el problema persiste.',
+      );
     }
   }
 
   async updateCard(
     cardId: number,
     updateCardDto: UpdateCardDto,
-  ): Promise<Card> {
+  ): Promise<CardWithMessage> {
     try {
       // Verificar si la tarjeta existe
       const existingCard = await this.prisma.card.findUnique({
         where: { id: cardId },
+        include: {
+          user: true,
+        },
       });
 
       if (!existingCard) {
-        throw new NotFoundException('Tarjeta no encontrada');
+        throw new NotFoundException(
+          `No se puede actualizar la tarjeta porque no existe una tarjeta con ID ${cardId}. ` +
+            'Por favor, verifique el ID de la tarjeta.',
+        );
       }
 
       // Si se está actualizando el número de tarjeta, verificar que no exista
@@ -272,22 +338,44 @@ export class UsersService {
         });
 
         if (cardExists) {
-          throw new ConflictException('El número de tarjeta ya está en uso');
+          throw new ConflictException(
+            `El número de tarjeta ${updateCardDto.cardNumber} ya está en uso. ` +
+              'Por favor, utilice un número de tarjeta diferente.',
+          );
         }
       }
 
-      return await this.prisma.card.update({
+      // Validar el límite si se proporciona
+      if (updateCardDto.limite !== undefined) {
+        if (updateCardDto.limite < 0) {
+          throw new BadRequestException(
+            'El límite de la tarjeta no puede ser negativo. ' +
+              'Por favor, proporcione un valor válido.',
+          );
+        }
+      }
+
+      const updatedCard = await this.prisma.card.update({
         where: { id: cardId },
         data: updateCardDto,
       });
+
+      return {
+        ...updatedCard,
+        message: 'Tarjeta actualizada exitosamente',
+      };
     } catch (error) {
       if (
         error instanceof NotFoundException ||
-        error instanceof ConflictException
+        error instanceof ConflictException ||
+        error instanceof BadRequestException
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Error al actualizar la tarjeta');
+      throw new InternalServerErrorException(
+        'Error inesperado al actualizar la tarjeta. ' +
+          'Por favor, intente nuevamente o contacte al administrador del sistema si el problema persiste.',
+      );
     }
   }
 }

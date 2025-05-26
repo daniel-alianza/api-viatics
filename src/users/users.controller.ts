@@ -14,6 +14,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateCardDto, UpdateCardDto } from './dto/card.dto';
+import { UserWithMessage, CardWithMessage } from './dto/types.dto';
 
 @Controller('users')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -52,12 +53,14 @@ export class UsersController {
   assignCard(
     @Param('id', ParseIntPipe) id: number,
     @Body() createCardDto: CreateCardDto,
-  ) {
+  ): Promise<UserWithMessage> {
     return this.usersService.assignCard(id, createCardDto.cardNumber);
   }
 
   @Delete('cards/:cardId')
-  removeCard(@Param('cardId', ParseIntPipe) cardId: number) {
+  removeCard(
+    @Param('cardId', ParseIntPipe) cardId: number,
+  ): Promise<CardWithMessage> {
     return this.usersService.removeCard(cardId);
   }
 
@@ -65,7 +68,7 @@ export class UsersController {
   updateCard(
     @Param('cardId', ParseIntPipe) cardId: number,
     @Body() updateCardDto: UpdateCardDto,
-  ) {
+  ): Promise<CardWithMessage> {
     return this.usersService.updateCard(cardId, updateCardDto);
   }
 }

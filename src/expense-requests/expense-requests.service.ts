@@ -70,15 +70,33 @@ export class ExpenseRequestsService {
       const disbursementDate = new Date(data.disbursementDate);
       const today = new Date();
 
-      if (departureDate < today) {
+      // Normalizar fechas para comparar solo la fecha sin la hora
+      const normalizeDate = (date: Date) => {
+        const normalized = new Date(date);
+        normalized.setHours(0, 0, 0, 0);
+        return normalized;
+      };
+
+      const normalizedDeparture = normalizeDate(departureDate);
+      const normalizedReturn = normalizeDate(returnDate);
+      const normalizedDisbursement = normalizeDate(disbursementDate);
+      const normalizedToday = normalizeDate(today);
+
+      if (normalizedDeparture < normalizedToday) {
         throw new BadRequestException(
           'La fecha de salida no puede ser anterior a la fecha actual',
         );
       }
 
-      if (returnDate < departureDate) {
+      if (normalizedReturn < normalizedDeparture) {
         throw new BadRequestException(
           'La fecha de regreso no puede ser anterior a la fecha de salida',
+        );
+      }
+
+      if (normalizedDisbursement > normalizedDeparture) {
+        throw new BadRequestException(
+          'La fecha de dispersión no puede ser posterior a la fecha de salida',
         );
       }
 
@@ -91,7 +109,7 @@ export class ExpenseRequestsService {
 
       // Validar que la suma de los detalles coincida con el total
       const totalDetails = data.details.reduce(
-        (sum, detail) => sum + detail.amount,
+        (sum, detail) => sum + (detail.amount > 0 ? detail.amount : 0),
         0,
       );
       if (Math.abs(totalDetails - data.totalAmount) > 0.01) {
@@ -108,14 +126,9 @@ export class ExpenseRequestsService {
             `El concepto es requerido para el detalle ${index + 1}`,
           );
         }
-        if (!detail.amount) {
+        if (detail.amount < 0) {
           throw new BadRequestException(
-            `El monto es requerido para el detalle ${index + 1}`,
-          );
-        }
-        if (detail.amount <= 0) {
-          throw new BadRequestException(
-            `El monto debe ser mayor a 0 para el detalle ${index + 1}`,
+            `El monto no puede ser negativo para el detalle ${index + 1}`,
           );
         }
       }
@@ -498,6 +511,63 @@ export class ExpenseRequestsService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al obtener las solicitudes de gastos',
+      );
+    }
+  }
+
+  async findByEmail(email: string): Promise<ExpenseRequestWithRelations[]> {
+    try {
+      return await this.prisma.expenseRequest.findMany({
+        where: {
+          user: {
+            email: email,
+          },
+        },
+        include: {
+          user: {
+            include: {
+              company: true,
+              branch: true,
+              area: true,
+              role: true,
+            },
+          },
+          details: true,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al buscar las solicitudes por correo electrónico',
+      );
+    }
+  }
+
+  async findDispersedByEmail(
+    email: string,
+  ): Promise<ExpenseRequestWithRelations[]> {
+    try {
+      return await this.prisma.expenseRequest.findMany({
+        where: {
+          user: {
+            email: email,
+          },
+          status: 'Dispersada',
+        },
+        include: {
+          user: {
+            include: {
+              company: true,
+              branch: true,
+              area: true,
+              role: true,
+            },
+          },
+          details: true,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al buscar las solicitudes dispersadas por correo electrónico',
       );
     }
   }

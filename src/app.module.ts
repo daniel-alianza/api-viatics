@@ -12,6 +12,7 @@ import { ComprobacionesModule } from './comprobaciones/comprobaciones.module';
 import { ViaticosModule } from './viaticos/viaticos.module';
 import { MovementsModule } from './movements/movements.module';
 import { MovimientosModule } from './movimientos/movimientos.module';
+import { ChecksModule } from './checks/checks.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MovimientosModule } from './movimientos/movimientos.module';
     ViaticosModule,
     MovementsModule,
     MovimientosModule,
+    ChecksModule,
   ],
   providers: [],
 })

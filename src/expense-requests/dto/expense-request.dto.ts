@@ -7,6 +7,7 @@ import {
   Min,
   IsNotEmpty,
   IsOptional,
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -16,7 +17,7 @@ export class ExpenseDetailDto {
   concept: string;
 
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   amount: number;
 }
 
@@ -59,4 +60,11 @@ export class UpdateExpenseRequestStatusDto {
   @IsOptional()
   @IsString()
   comment?: string;
+}
+
+export class FindByEmailDto {
+  @IsString()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }

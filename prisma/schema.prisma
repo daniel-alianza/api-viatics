@@ -54,9 +54,6 @@ model User {
   cards             Card[]
   approvedRequests  ExpenseRequest[] @relation("ApproverRelation")
   expenseRequests   ExpenseRequest[]
-  quotations        Quotation[]      @relation("UserQuotations")
-  quotationsCreated Quotation[]      @relation("UserCreatedQuotations")
-  quotesUsers       QuotesUsers[]
   area              Area?            @relation(fields: [areaId], references: [id])
   branch            Branch?          @relation(fields: [branchId], references: [id])
   company           Company?         @relation(fields: [companyId], references: [id])
@@ -69,19 +66,6 @@ model User {
   @@index([areaId], map: "User_ID_AREA_fkey")
   @@index([roleId], map: "User_ID_ROLE_fkey")
   @@index([managerId], map: "User_MANAGER_ID_fkey")
-}
-
-model Quotation {
-  id            Int           @id @default(autoincrement()) @map("ID")
-  urlQuotation  String        @map("URL_QUOTATION")
-  userCreatorId Int?          @map("USER_CREATOR")
-  userId        Int?          @map("ID_USER")
-  user          User?         @relation("UserQuotations", fields: [userId], references: [id])
-  userCreator   User?         @relation("UserCreatedQuotations", fields: [userCreatorId], references: [id])
-  quotesUsers   QuotesUsers[]
-
-  @@index([userId], map: "Quotation_ID_USER_fkey")
-  @@index([userCreatorId], map: "Quotation_USER_CREATOR_fkey")
 }
 
 model ExpenseRequest {
@@ -115,17 +99,6 @@ model ExpenseDetail {
   @@index([expenseRequestId], map: "ExpenseDetail_ID_EXPENSE_REQUEST_fkey")
 }
 
-model QuotesUsers {
-  id      Int        @id @default(autoincrement()) @map("ID")
-  quoteId Int?       @map("QUOTE_ID")
-  userId  Int?       @map("ID_USER")
-  user    User?      @relation(fields: [userId], references: [id])
-  quote   Quotation? @relation(fields: [quoteId], references: [id])
-
-  @@index([userId], map: "QuotesUsers_ID_USER_fkey")
-  @@index([quoteId], map: "QuotesUsers_QUOTE_ID_fkey")
-}
-
 model Card {
   id         Int      @id @default(autoincrement()) @map("ID")
   cardNumber String   @unique @map("CARD_NUMBER")
@@ -144,3 +117,4 @@ model InspirationQuote {
   author    String?  @map("AUTHOR")
   createdAt DateTime @default(now()) @map("CREATED_AT")
 }
+
