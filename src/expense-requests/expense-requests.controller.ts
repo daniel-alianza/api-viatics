@@ -46,11 +46,11 @@ export class ExpenseRequestsController {
     return this.expenseRequestsService.findDispersedByEmail(query.email);
   }
 
-  @Get(':id/approve')
+  @Post(':id/approve')
   async approveRequest(
     @Param('id', ParseIntPipe) id: number,
     @Query('approverId', ParseIntPipe) approverId: number,
-    @Query('comment') comment?: string,
+    @Body('comment') comment?: string,
   ) {
     try {
       const result = await this.expenseRequestsService.approveRequest(
@@ -71,11 +71,11 @@ export class ExpenseRequestsController {
     }
   }
 
-  @Get(':id/reject')
+  @Post(':id/reject')
   async rejectRequest(
     @Param('id', ParseIntPipe) id: number,
     @Query('approverId', ParseIntPipe) approverId: number,
-    @Query('comment') comment?: string,
+    @Body('comment') comment?: string,
   ) {
     try {
       const result = await this.expenseRequestsService.rejectRequest(

@@ -24,6 +24,5 @@ async function bootstrap() {
   app.enableCors();
   const port = process.env.APP_PORT || 3000;
   await app.listen(port);
-  Logger.log(`El servidor esta corriendo en: http://localhost:${port}`);
 }
 bootstrap();

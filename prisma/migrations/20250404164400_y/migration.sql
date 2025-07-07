@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `ExpenseRequest` MODIFY `COMMENT` VARCHAR(191) NULL;

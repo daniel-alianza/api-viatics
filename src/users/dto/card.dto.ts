@@ -20,6 +20,10 @@ export class CreateCardDto {
   @Min(0)
   @IsOptional()
   limite?: number;
+
+  @IsNumber()
+  @IsOptional()
+  companyId?: number;
 }
 
 export class UpdateCardDto {
@@ -35,4 +39,8 @@ export class UpdateCardDto {
   @Min(0)
   @IsOptional()
   limite?: number;
+
+  @IsNumber()
+  @IsOptional()
+  companyId?: number;
 }

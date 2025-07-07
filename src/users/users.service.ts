@@ -40,7 +40,18 @@ export class UsersService {
           branch: true,
           area: true,
           role: true,
-          cards: true,
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          cards: {
+            include: {
+              company: true,
+            },
+          },
         },
       });
     } catch (error) {
@@ -59,7 +70,18 @@ export class UsersService {
           branch: true,
           area: true,
           role: true,
-          cards: true,
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          cards: {
+            include: {
+              company: true,
+            },
+          },
         },
       });
     } catch (error) {
@@ -77,7 +99,18 @@ export class UsersService {
           branch: true,
           area: true,
           role: true,
-          cards: true,
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          cards: {
+            include: {
+              company: true,
+            },
+          },
         },
       });
 
@@ -129,7 +162,18 @@ export class UsersService {
           branch: true,
           area: true,
           role: true,
-          cards: true,
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          cards: {
+            include: {
+              company: true,
+            },
+          },
         },
       });
     } catch (error) {
@@ -166,7 +210,18 @@ export class UsersService {
           branch: true,
           area: true,
           role: true,
-          cards: true,
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          cards: {
+            include: {
+              company: true,
+            },
+          },
         },
       });
     } catch (error) {
@@ -177,7 +232,11 @@ export class UsersService {
     }
   }
 
-  async assignCard(id: number, cardNumber: string): Promise<UserWithMessage> {
+  async assignCard(
+    id: number,
+    cardNumber: string,
+    companyId?: number,
+  ): Promise<UserWithMessage> {
     try {
       // Validación del número de tarjeta
       if (!cardNumber || cardNumber.trim().length === 0) {
@@ -222,6 +281,19 @@ export class UsersService {
         );
       }
 
+      // Validación: solo una tarjeta por usuario por compañía
+      if (companyId) {
+        const cardInCompany = existingUser.cards.find(
+          (card) => card.companyId === companyId,
+        );
+        if (cardInCompany) {
+          throw new BadRequestException(
+            `El usuario ya tiene una tarjeta asignada para la compañía con ID ${companyId}. ` +
+              'No se pueden asignar varias tarjetas de la misma compañía a un usuario.',
+          );
+        }
+      }
+
       const updatedUser = await this.prisma.user.update({
         where: { id },
         data: {
@@ -230,6 +302,7 @@ export class UsersService {
               cardNumber,
               isActive: true,
               limite: 0.01, // Límite por defecto
+              ...(companyId && { companyId }), // Asignar companyId si se proporciona
             },
           },
         },
@@ -238,7 +311,18 @@ export class UsersService {
           branch: true,
           area: true,
           role: true,
-          cards: true,
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          cards: {
+            include: {
+              company: true,
+            },
+          },
         },
       });
 

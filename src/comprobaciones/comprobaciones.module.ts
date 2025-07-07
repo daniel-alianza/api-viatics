@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ComprobacionesController } from './comprobaciones.controller';
 import { ComprobacionesService } from './comprobaciones.service';
-import { ComprobacionesHelper } from '../helpers/comprobaciones.helper';
-import { DatabaseModule } from '../database/database.module';
+import { PrismaClient } from '@prisma/client';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [],
   controllers: [ComprobacionesController],
-  providers: [ComprobacionesService, ComprobacionesHelper],
+  providers: [ComprobacionesService, PrismaClient],
   exports: [ComprobacionesService],
 })
 export class ComprobacionesModule {}

@@ -54,7 +54,11 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() createCardDto: CreateCardDto,
   ): Promise<UserWithMessage> {
-    return this.usersService.assignCard(id, createCardDto.cardNumber);
+    return this.usersService.assignCard(
+      id,
+      createCardDto.cardNumber,
+      createCardDto.companyId,
+    );
   }
 
   @Delete('cards/:cardId')

@@ -12,7 +12,7 @@ export class RegisterDto {
   @MinLength(1)
   name: string;
 
-  @IsEmail()
+  @IsEmail({}, { message: 'Necesitas un email para iniciar sesión' })
   @Transform(({ value }) => value.toLowerCase())
   email: string;
 
@@ -35,7 +35,7 @@ export class RegisterDto {
 }
 
 export class LoginDto {
-  @IsEmail()
+  @IsEmail({}, { message: 'Necesitas un email para iniciar sesión' })
   @Transform(({ value }) => value.toLowerCase())
   email: string;
 

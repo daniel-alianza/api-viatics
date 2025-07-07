@@ -118,7 +118,7 @@ export class AuthService {
         branchId: data.branchId || null,
         areaId: data.areaId || null,
         managerId: data.managerId || null,
-        roleId: 2, // ID del rol empleado
+        roleId: 4, // ID del rol empleado
       };
 
       const newUser = await prisma.user.create({
@@ -128,6 +128,11 @@ export class AuthService {
           branch: true,
           area: true,
           role: true,
+          cards: {
+            include: {
+              company: true,
+            },
+          },
         },
       });
 
@@ -177,7 +182,11 @@ export class AuthService {
           branch: true,
           area: true,
           role: true,
-          cards: true,
+          cards: {
+            include: {
+              company: true,
+            },
+          },
         },
       });
 

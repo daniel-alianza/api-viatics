@@ -12,6 +12,7 @@ model Company {
   name     String   @map("NAME")
   branches Branch[]
   users    User[]
+  cards    Card[]
 }
 
 model Role {
@@ -54,12 +55,16 @@ model User {
   cards             Card[]
   approvedRequests  ExpenseRequest[] @relation("ApproverRelation")
   expenseRequests   ExpenseRequest[]
+  comprobaciones    Comprobacion[]
+  approvedComprobaciones Comprobacion[] @relation("ComprobacionApprover")
+  sapStatuses        SapStatus[]      @relation("SapStatusUser")
   area              Area?            @relation(fields: [areaId], references: [id])
   branch            Branch?          @relation(fields: [branchId], references: [id])
   company           Company?         @relation(fields: [companyId], references: [id])
   role              Role             @relation(fields: [roleId], references: [id])
   manager           User?            @relation("UserManager", fields: [managerId], references: [id])
   subordinates      User[]           @relation("UserManager")
+  permissions       Permission[]
 
   @@index([companyId], map: "User_ID_COMPANY_fkey")
   @@index([branchId], map: "User_ID_BRANCH_fkey")
@@ -82,6 +87,7 @@ model ExpenseRequest {
   approverId       Int?            @map("APPROVER_ID")
   comment          String?         @map("COMMENT")
   details          ExpenseDetail[]
+  comprobaciones   Comprobacion[]
   approver         User?           @relation("ApproverRelation", fields: [approverId], references: [id])
   user             User            @relation(fields: [userId], references: [id])
 
@@ -103,12 +109,15 @@ model Card {
   id         Int      @id @default(autoincrement()) @map("ID")
   cardNumber String   @unique @map("CARD_NUMBER")
   userId     Int?     @map("ID_USER")
+  companyId  Int?     @map("ID_COMPANY")
   isActive   Boolean  @default(true) @map("IS_ACTIVE")
   assignedAt DateTime @default(now()) @map("ASSIGNED_AT")
   limite     Decimal  @default(0.010000000000000000000000000000) @map("LIMITE")
   user       User?    @relation(fields: [userId], references: [id])
+  company    Company? @relation(fields: [companyId], references: [id])
 
   @@index([userId], map: "Card_ID_USER_fkey")
+  @@index([companyId], map: "Card_ID_COMPANY_fkey")
 }
 
 model InspirationQuote {
@@ -116,5 +125,90 @@ model InspirationQuote {
   content   String   @map("CONTENT")
   author    String?  @map("AUTHOR")
   createdAt DateTime @default(now()) @map("CREATED_AT")
+}
+
+model Comprobacion {
+  id                Int         @id @default(autoincrement())
+  viaticoId         String
+  sequence          String
+  dueDate           DateTime
+  memo              String
+  debitAmount       Float
+  acctName          String
+  ref               String
+  status            String      @default("pendiente")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  userId            Int
+  expenseRequestId  Int?
+  comprobanteType   String      @default("factura")
+  responsable       String?
+  motivo            String?
+  descripcion       String?
+  importe           Float?
+  approverId        Int?
+  approverComment   String?
+  user              User        @relation(fields: [userId], references: [id])
+  expenseRequest    ExpenseRequest? @relation(fields: [expenseRequestId], references: [id])
+  approver          User?       @relation("ComprobacionApprover", fields: [approverId], references: [id])
+  documents         Document[]
+  sapStatus         SapStatus?
+  // movimientosComprobados MovimientosComprobados[] // Eliminada la relación
+
+  @@index([viaticoId])
+  @@index([userId])
+  @@index([expenseRequestId])
+  @@index([approverId])
+}
+
+model Document {
+  id            Int         @id @default(autoincrement())
+  type          String
+  fileName      String
+  fileContent   Bytes
+  fileSize      Int
+  mimeType      String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  comprobacionId Int
+  description   String?
+  comprobacion  Comprobacion @relation(fields: [comprobacionId], references: [id])
+
+  @@index([comprobacionId])
+}
+
+model SapStatus {
+  id              Int         @id @default(autoincrement())
+  comprobacionId  Int         @unique
+  isSentToSap     Boolean     @default(false)
+  sapDocEntry     String?
+  sentAt          DateTime?
+  sentBy          Int?
+  sapResponse     String?     // Respuesta completa de SAP (JSON)
+  errorMessage    String?     // Mensaje de error si falló
+  comprobacion    Comprobacion @relation(fields: [comprobacionId], references: [id])
+  user            User?       @relation("SapStatusUser", fields: [sentBy], references: [id])
+
+  @@index([comprobacionId])
+  @@index([sentBy])
+}
+
+model MovimientosComprobados {
+  id                 Int      @id @default(autoincrement())
+  movimientoSequence String
+  movimientoDueDate  DateTime
+  movimientoRef      String
+  movimientoAcctName String
+  movimientoDebAmount Float
+  movimientoMemo     String
+}
+
+model Permission {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  viewName String
+  user     User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, viewName])
 }
 

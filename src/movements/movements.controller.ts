@@ -1,49 +1,63 @@
 import {
   Controller,
   Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
   Query,
-  HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { MovementsService } from './movements.service';
+import { CreateMovementDto } from './dto/create-movement.dto';
+import { UpdateMovementDto } from './dto/update-movement.dto';
+import { ApiResponse } from '../shared/interfaces/api-response.interface';
 
 @Controller('movements')
 export class MovementsController {
   constructor(private readonly movementsService: MovementsService) {}
 
-  @Get()
-  async getMovementsByCard(
+  @Get('by-date-range')
+  async findMovementsByDateRange(
+    @Query('accountCode') accountCode: string,
     @Query('cardNumber') cardNumber: string,
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
-  ) {
-    try {
-      if (!cardNumber || !startDate || !endDate) {
-        throw new HttpException(
-          {
-            status: 'error',
-            message: 'Se requieren cardNumber, startDate y endDate',
-            timestamp: new Date().toISOString(),
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+  ): Promise<ApiResponse> {
+    const createMovementDto: CreateMovementDto = {
+      accountCode,
+      cardNumber,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+    };
+    return this.movementsService.findMovementsByDateRange(createMovementDto);
+  }
 
-      return await this.movementsService.getMovementsByCard(
-        cardNumber,
-        startDate,
-        endDate,
-      );
-    } catch (error) {
-      throw new HttpException(
-        {
-          status: 'error',
-          message: 'Error al procesar la solicitud',
-          error: error instanceof Error ? error.message : 'Error desconocido',
-          timestamp: new Date().toISOString(),
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  @Post()
+  create(@Body() createMovementDto: CreateMovementDto) {
+    return this.movementsService.create(createMovementDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.movementsService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.movementsService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateMovementDto: UpdateMovementDto,
+  ) {
+    return this.movementsService.update(+id, updateMovementDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.movementsService.remove(+id);
   }
 }
