@@ -9,6 +9,8 @@ import { CardMatchService } from './services/card-match.service';
 import { InvoiceTransformerService } from './services/invoice-transformer.service';
 import { ServiceLayerInvoiceService } from './services/service-layer-invoice.service';
 import { PrismaClient } from '@prisma/client';
+import { TicketContabilidadService } from './services/ticket-contabilidad.service';
+import { DistributionRulesModule } from '../distribution-rules/distribution-rules.module';
 
 @Module({
   imports: [
@@ -16,6 +18,7 @@ import { PrismaClient } from '@prisma/client';
     UsersModule,
     WholesaleAccountsModule,
     SalesTaxcodeModule,
+    DistributionRulesModule,
   ],
   controllers: [GenerateFactProvController],
   providers: [
@@ -24,6 +27,8 @@ import { PrismaClient } from '@prisma/client';
     InvoiceTransformerService,
     ServiceLayerInvoiceService,
     PrismaClient,
+    TicketContabilidadService,
   ],
+  exports: [TicketContabilidadService],
 })
 export class GenerateFactProvModule {}

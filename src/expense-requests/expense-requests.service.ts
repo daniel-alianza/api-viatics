@@ -19,6 +19,37 @@ export class ExpenseRequestsService {
     private mailService: MailService,
   ) {}
 
+  private conceptTranslations: Record<string, string> = {
+    flight: 'Vuelo',
+    hotel: 'Hotel',
+    food: 'Alimentos',
+    transport: 'Transporte',
+    transportation: 'Transporte',
+    taxi: 'Taxi',
+    gasoline: 'Gasolina',
+    toll: 'Caseta',
+    tolls: 'Casetas',
+    parking: 'Estacionamiento',
+    breakfast: 'Desayuno',
+    lunch: 'Comida',
+    dinner: 'Cena',
+    snacks: 'Snacks',
+    supplies: 'Suministros',
+    other: 'Otro',
+    lodging: 'Hospedaje',
+    freight: 'Flete',
+    tools: 'Herramientas',
+    shipping: 'Envío',
+    miscellaneous: 'Misceláneos',
+    // Agrega más traducciones según tus necesidades
+  };
+
+  private translateConcept(concept: string): string {
+    if (!concept) return '';
+    const normalized = concept.trim().toLowerCase();
+    return this.conceptTranslations[normalized] || concept;
+  }
+
   async create(
     data: CreateExpenseRequestDto,
   ): Promise<ExpenseRequestWithRelations> {
@@ -248,6 +279,12 @@ export class ExpenseRequestsService {
         );
       }
 
+      // Traducir conceptos de los detalles
+      const translatedDetails = expenseRequest.details.map((detail) => ({
+        ...detail,
+        concept: this.translateConcept(detail.concept),
+      }));
+
       await this.mailService.sendMail({
         to: areaAdmin.email || 'daniel.ortiz@alianzaelectrica.com',
         subject: `Solicitud de Viáticos - ${user.name}`,
@@ -264,7 +301,7 @@ export class ExpenseRequestsService {
           disbursementDate:
             expenseRequest.disbursementDate.toLocaleDateString('es-MX'),
           totalAmount,
-          details: expenseRequest.details,
+          details: translatedDetails,
           travelObjectives: expenseRequest.travelObjectives,
           requestedBy: user.name,
           requestId: expenseRequest.id,
@@ -415,6 +452,12 @@ export class ExpenseRequestsService {
         throw new NotFoundException('No se encontró información del aprobador');
       }
 
+      // Traducir conceptos de los detalles
+      const translatedDetails = expenseRequest.details.map((detail) => ({
+        ...detail,
+        concept: this.translateConcept(detail.concept),
+      }));
+
       // Enviar correo al solicitante
       await this.mailService.sendMail({
         to: user.email,
@@ -428,6 +471,7 @@ export class ExpenseRequestsService {
           returnDate: expenseRequest.returnDate.toLocaleDateString('es-MX'),
           totalAmount,
           comment: expenseRequest.comment || 'Aprobado sin comentarios',
+          details: translatedDetails,
         },
       });
 
@@ -449,7 +493,7 @@ export class ExpenseRequestsService {
           disbursementDate:
             expenseRequest.disbursementDate.toLocaleDateString('es-MX'),
           totalAmount,
-          details: expenseRequest.details,
+          details: translatedDetails,
           comment: expenseRequest.comment || 'Aprobado sin comentarios',
         },
       });
@@ -471,6 +515,12 @@ export class ExpenseRequestsService {
         currency: 'MXN',
       });
 
+      // Traducir conceptos de los detalles
+      const translatedDetails = expenseRequest.details.map((detail) => ({
+        ...detail,
+        concept: this.translateConcept(detail.concept),
+      }));
+
       await this.mailService.sendMail({
         to: user.email,
         subject: 'Solicitud de Viáticos Rechazada',
@@ -483,6 +533,7 @@ export class ExpenseRequestsService {
           returnDate: expenseRequest.returnDate.toLocaleDateString('es-MX'),
           totalAmount,
           comment: expenseRequest.comment || 'Rechazado sin comentarios',
+          details: translatedDetails,
         },
       });
     } catch (error) {

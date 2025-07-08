@@ -73,7 +73,7 @@ export class ServiceLayerInvoiceService {
             where: { comprobacionId },
             update: {
               isSentToSap: true,
-              sapDocEntry: response.data.DocEntry,
+              sapDocEntry: String(response.data.DocEntry),
               sentAt: new Date(),
               sentBy: approverId,
               sapResponse: JSON.stringify(response.data),
@@ -82,7 +82,7 @@ export class ServiceLayerInvoiceService {
             create: {
               comprobacionId,
               isSentToSap: true,
-              sapDocEntry: response.data.DocEntry,
+              sapDocEntry: String(response.data.DocEntry),
               sentAt: new Date(),
               sentBy: approverId,
               sapResponse: JSON.stringify(response.data),

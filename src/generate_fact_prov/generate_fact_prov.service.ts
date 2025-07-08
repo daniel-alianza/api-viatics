@@ -50,6 +50,20 @@ export class GenerateFactProvService {
     request: GenerateFactProvRequestDto,
   ): Promise<FactProvResponse> {
     try {
+      // Validar que NO sea un vale/ticket
+      if (
+        request.xmlData?.Comprobante?.TipoDeComprobante?.toLowerCase() ===
+          'vale' ||
+        request.xmlData?.Comprobante?.TipoDeComprobante?.toLowerCase() ===
+          'ticket'
+      ) {
+        return {
+          success: false,
+          message: 'No se permite procesar vales o tickets en este servicio.',
+          error: 'Tipo de comprobante no permitido',
+        };
+      }
+
       // 1. Validar que las tarjetas coincidan
       const cardMatchResult =
         await this.cardMatchService.matchCardWithServiceLayer(

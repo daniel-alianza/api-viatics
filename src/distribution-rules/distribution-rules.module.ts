@@ -9,5 +9,6 @@ import { AuthSlModule } from '../auth-sl/auth-sl.module';
   imports: [HttpModule, ConfigModule, AuthSlModule],
   controllers: [DistributionRulesController],
   providers: [DistributionRulesService],
+  exports: [DistributionRulesService],
 })
 export class DistributionRulesModule {}
