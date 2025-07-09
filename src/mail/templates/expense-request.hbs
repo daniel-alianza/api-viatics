@@ -190,18 +190,10 @@
             <div class="actions">
                 <div class="button-container">
                     <a href="{{apiUrl}}/expense-requests/{{requestId}}/approve?approverId={{approverId}}&comment=Aprobado" class="button approve-button">
-                        Aprobar sin comentarios
+                        Aprobar (comentario: Aprobado)
                     </a>
-                    <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado.%20Falta%20información" class="button reject-button">
-                        Rechazar - Falta información
-                    </a>
-                </div>
-                <div class="button-container">
-                    <a href="{{apiUrl}}/expense-requests/{{requestId}}/approve?approverId={{approverId}}&comment=Aprobado.%20Favor%20de%20entregar%20comprobantes%20originales" class="button approve-button">
-                        Aprobar con comprobantes
-                    </a>
-                    <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado.%20Montos%20incorrectos" class="button reject-button">
-                        Rechazar - Montos incorrectos
+                    <a href="{{apiUrl}}/expense-requests/{{requestId}}/reject?approverId={{approverId}}&comment=Rechazado" class="button reject-button">
+                        Rechazar (comentario: Rechazado)
                     </a>
                 </div>
             </div>

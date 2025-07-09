@@ -109,4 +109,90 @@ export class ExpenseRequestsController {
   async disburseRequest(@Param('id', ParseIntPipe) id: number) {
     return this.expenseRequestsService.updateStatus(id, 'Dispersada');
   }
+
+  @Get(':id/approve')
+  async approveRequestGet(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('approverId', ParseIntPipe) approverId: number,
+    @Query('comment') comment?: string,
+  ) {
+    try {
+      const result = await this.expenseRequestsService.approveRequest(
+        id,
+        approverId,
+        comment,
+      );
+      // Buscar datos del jefe inmediato y colaborador
+      const colaborador = result.user?.name || 'el colaborador';
+      let jefeEmail: string | null = null;
+      if (result.user?.managerId) {
+        const manager = await this.expenseRequestsService[
+          'prisma'
+        ].user.findUnique({
+          where: { id: result.user.managerId },
+        });
+        jefeEmail = manager?.email ?? null;
+      }
+      // Enviar correo de confirmación al jefe inmediato
+      if (jefeEmail) {
+        await this.expenseRequestsService['mailService'].enviarCorreo({
+          to: jefeEmail,
+          subject: 'Confirmación de aprobación de viáticos',
+          template: 'approvalConfirmation',
+          context: {
+            colaborador,
+            resultado: 'aprobado',
+            esRechazo: false,
+          },
+        });
+      }
+      // No retornar página ni redirigir
+      return '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  @Get(':id/reject')
+  async rejectRequestGet(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('approverId', ParseIntPipe) approverId: number,
+    @Query('comment') comment?: string,
+  ) {
+    try {
+      const result = await this.expenseRequestsService.rejectRequest(
+        id,
+        approverId,
+        comment,
+      );
+      // Buscar datos del jefe inmediato y colaborador
+      const colaborador = result.user?.name || 'el colaborador';
+      let jefeEmail: string | null = null;
+      if (result.user?.managerId) {
+        const manager = await this.expenseRequestsService[
+          'prisma'
+        ].user.findUnique({
+          where: { id: result.user.managerId },
+        });
+        jefeEmail = manager?.email ?? null;
+      }
+      // Enviar correo de confirmación al jefe inmediato
+      if (jefeEmail) {
+        await this.expenseRequestsService['mailService'].enviarCorreo({
+          to: jefeEmail,
+          subject: 'Confirmación de rechazo de viáticos',
+          template: 'approvalConfirmation',
+          context: {
+            colaborador,
+            resultado: 'rechazado',
+            esRechazo: true,
+          },
+        });
+      }
+      // No retornar página ni redirigir
+      return '';
+    } catch (error) {
+      return '';
+    }
+  }
 }

@@ -19,9 +19,6 @@ export async function main() {
         {
           name: 'Tableros y Arrancadores',
         },
-        {
-          name: 'Pruebas TI',
-        },
       ],
     });
     console.log('Compañías creadas:', companies);

@@ -171,47 +171,6 @@ export async function main() {
           name: 'San Luis Potosi',
           companyId: 4,
         },
-        // Pruebas TI (companyId: 5)
-        {
-          name: 'Atizapan',
-          companyId: 5,
-        },
-        {
-          name: 'Culiacan',
-          companyId: 5,
-        },
-        {
-          name: 'Hermosillo',
-          companyId: 5,
-        },
-        {
-          name: 'La paz',
-          companyId: 5,
-        },
-        {
-          name: 'Leon',
-          companyId: 5,
-        },
-        {
-          name: 'Merida, Yucatan',
-          companyId: 5,
-        },
-        {
-          name: 'Monterrey',
-          companyId: 5,
-        },
-        {
-          name: 'Puebla',
-          companyId: 5,
-        },
-        {
-          name: 'Queretaro',
-          companyId: 5,
-        },
-        {
-          name: 'San Luis Potosi',
-          companyId: 5,
-        },
       ],
     });
     console.log('Sucursales creadas:', branches);

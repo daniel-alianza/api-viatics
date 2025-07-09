@@ -263,20 +263,12 @@ export class ExpenseRequestsService {
         currency: 'MXN',
       });
 
-      // Buscar al administrador del área
-      const areaAdmin = await this.prisma.user.findFirst({
-        where: {
-          companyId: user.companyId,
-          branchId: user.branchId,
-          areaId: user.areaId,
-          roleId: 1, // Rol de administrador
-        },
-      });
-
-      if (!areaAdmin) {
-        throw new NotFoundException(
-          'No se encontró un administrador para esta área',
-        );
+      // Buscar al jefe inmediato del usuario
+      let manager: any = null;
+      if (user.managerId) {
+        manager = await this.prisma.user.findUnique({
+          where: { id: user.managerId },
+        });
       }
 
       // Traducir conceptos de los detalles
@@ -285,10 +277,22 @@ export class ExpenseRequestsService {
         concept: this.translateConcept(detail.concept),
       }));
 
-      await this.mailService.sendMail({
-        to: areaAdmin.email || 'daniel.ortiz@alianzaelectrica.com',
+      // Preparar destinatarios para el correo
+      // Ahora solo se envía al jefe inmediato
+      if (!manager || !manager.email) {
+        console.warn(
+          'No se encontró jefe inmediato con email, no se envía correo',
+        );
+        return;
+      }
+      const destinatarios = [manager.email];
+      const bccList: string[] = [];
+
+      await this.mailService.enviarCorreo({
+        to: destinatarios,
         subject: `Solicitud de Viáticos - ${user.name}`,
         template: 'request',
+        bcc: bccList,
         context: {
           userName: user.name,
           company: user.company?.name || '',
@@ -305,7 +309,7 @@ export class ExpenseRequestsService {
           travelObjectives: expenseRequest.travelObjectives,
           requestedBy: user.name,
           requestId: expenseRequest.id,
-          approverId: areaAdmin.id,
+          approverId: manager.id,
           apiUrl: process.env.API_URL || 'http://localhost:3000',
         },
       });
@@ -459,7 +463,7 @@ export class ExpenseRequestsService {
       }));
 
       // Enviar correo al solicitante
-      await this.mailService.sendMail({
+      await this.mailService.enviarCorreo({
         to: user.email,
         subject: 'Solicitud de Viáticos Aprobada',
         template: 'approved',
@@ -476,8 +480,8 @@ export class ExpenseRequestsService {
       });
 
       // Enviar correo al tesorero
-      await this.mailService.sendMail({
-        to: 'daniel.ortiz@alianzaelectrica.com',
+      await this.mailService.enviarCorreo({
+        to: 'angel.pichardo@alianzaelectrica.com',
         subject: 'Nueva Solicitud de Viáticos Aprobada',
         template: 'treasurer',
         context: {
@@ -521,7 +525,7 @@ export class ExpenseRequestsService {
         concept: this.translateConcept(detail.concept),
       }));
 
-      await this.mailService.sendMail({
+      await this.mailService.enviarCorreo({
         to: user.email,
         subject: 'Solicitud de Viáticos Rechazada',
         template: 'rejected',
